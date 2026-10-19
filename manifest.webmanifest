@@ -1,0 +1,25 @@
+{
+  "name": "Purple Hippo — Search the Web",
+  "short_name": "Purple Hippo",
+  "description": "Independent web discovery powered by Bubbles.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#faf7ff",
+  "theme_color": "#6937ad",
+  "icons": [
+    {
+      "src": "/hippo-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/hippo-icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
