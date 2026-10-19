@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Purple Hippo — Search the Web</title>
+<meta name="description" content="Explore the web with Purple Hippo, powered by the independent Bubbles search index.">
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#261a38;background:#faf7ff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh}header{padding:18px 24px;display:flex;justify-content:space-between;align-items:center}header a{color:#5d3697;text-decoration:none;font-weight:700}main{max-width:760px;margin:8vh auto 4rem;padding:0 22px}h1{font-size:clamp(3rem,9vw,5.5rem);letter-spacing:-.07em;color:#6937ad;margin:0;text-align:center}.tag{text-align:center;color:#665c74;margin:4px 0 32px}.search{display:flex;background:white;border:2px solid #cbb8e6;border-radius:100px;padding:7px;box-shadow:0 10px 32px #52267a13;gap:8px}input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-size:18px;padding:12px 18px;background:transparent}button{border:0;border-radius:99px;padding:12px 24px;background:#733bc2;color:white;font:inherit;font-weight:700;cursor:pointer}button:hover{background:#592b9b}.tabs{display:flex;gap:20px;margin:22px 8px;color:#756a83;font-size:14px}.tabs strong{color:#6d37af}.status{color:#766e80;font-size:14px;margin:24px 8px}.result{background:#fff;border:1px solid #eee7f5;border-radius:16px;padding:18px 20px;margin:12px 0;overflow-wrap:anywhere}.result a{font-size:19px;font-weight:650;color:#6035a5;text-decoration:none}.result a:hover{text-decoration:underline}.url{font-size:12px;color:#438060;margin:8px 0}.desc{font-size:14px;line-height:1.55;color:#4b4653;margin:0}footer{text-align:center;color:#7a7087;font-size:13px;margin:5rem 12px 25px}footer b{color:#653caf}
+</style>
+</head>
+<body>
+<header><a href="/">🦛 Purple Hippo</a><span>Independent web discovery</span></header>
+<main>
+<h1>Purple Hippo</h1><p class="tag">Explore something wonderful.</p>
+<form id="searchForm" class="search"><input id="query" type="search" aria-label="Search the web" placeholder="What are you looking for?" required autofocus><button type="submit">Search</button></form>
+<div class="tabs"><strong>Web</strong><span>More discoveries coming soon</span></div>
+<p class="status" id="status">Powered by Bubbles 🫧</p><section id="results" aria-live="polite"></section>
+</main>
+<footer>Made by Box Signal · <b>Powered by Bubbles 🫧</b></footer>
+<script>
+const SOURCE='https://raw.githubusercontent.com/elspilster/Box-Signal/main/bubbles/bubbles_search.json';
+const form=document.getElementById('searchForm'),input=document.getElementById('query'),status=document.getElementById('status'),results=document.getElementById('results');
+let pages=null;
+function safeURL(s){try{const u=new URL(s);return ['http:','https:'].includes(u.protocol)?u.href:null}catch{return null}}
+async function getPages(){if(pages)return pages;const res=await fetch(SOURCE,{cache:'no-store'});if(!res.ok)throw Error('Index unavailable');const data=await res.json();pages=Array.isArray(data.pages)?data.pages:[];return pages}
+function score(p,terms){const title=String(p.title||'').toLowerCase(),desc=String(p.description||'').toLowerCase(),body=String(p.text||'').toLowerCase();return terms.reduce((n,t)=>n+(title.includes(t)?12:0)+(desc.includes(t)?5:0)+(body.includes(t)?1:0),0)}
+async function search(q){results.replaceChildren();status.textContent='Searching the Bubbles index…';try{const all=await getPages(),terms=q.toLowerCase().split(/\s+/).filter(Boolean);const hits=all.map(p=>({p,rank:score(p,terms)})).filter(x=>x.rank>0&&safeURL(x.p.url)).sort((a,b)=>b.rank-a.rank).slice(0,30);status.textContent=hits.length+' result'+(hits.length===1?'':'s')+' · '+all.length+' indexed pages';if(!hits.length){status.textContent+=' — No matches yet. Our independent index is still growing.';return}for(const {p} of hits){const item=document.createElement('article');item.className='result';const link=document.createElement('a');link.href=safeURL(p.url);link.target='_blank';link.rel='noopener noreferrer';link.textContent=p.title||p.url;const url=document.createElement('div');url.className='url';url.textContent=p.url;const desc=document.createElement('p');desc.className='desc';desc.textContent=String(p.description||p.text||'').slice(0,260);item.append(link,url,desc);results.append(item)}}catch(e){status.textContent='Search index is temporarily unavailable. Please try again later.'}}
+form.addEventListener('submit',e=>{e.preventDefault();const q=input.value.trim();if(!q)return;history.replaceState(null,'','?q='+encodeURIComponent(q));search(q)});
+const initial=new URLSearchParams(location.search).get('q');if(initial){input.value=initial;search(initial)}
+</script>
+</body></html>
